@@ -15,7 +15,7 @@ const useStyles = makeStyles({
     minWidth: 200,
     paddingLeft: 30,
     paddingRight: 30,
-    marginTop: 60,
+    marginTop: 20,
     alignItems: 'center', justifyContent: 'center'
   },
   heading:{

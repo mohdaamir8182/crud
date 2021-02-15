@@ -1,50 +1,190 @@
-import React from 'react';
-import "../styles/Layout.module.css";
-import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    makeStyles,
+    Button,
+    IconButton,
+    Drawer,
+    Link,
+    MenuItem,
+  } from "@material-ui/core";
+  import MenuIcon from "@material-ui/icons/Menu";
+  import React, { useState, useEffect } from "react";
+  import {Link as RouterLink} from 'next/link';
 import { useRouter } from 'next/router';
 
+  const headersData = [
+    {
+      label: "Home",
+      href: "/",
+    },
+    {
+      label: "Posts",
+      href: "/posts",
+    },
+    {
+      label: "My Account",
+      href: "/account",
+    },
+    {
+      label: "Log Out",
+      href: "/logout",
+    },
+  ];
+  
+  const useStyles = makeStyles(() => ({
+    header: {
+      backgroundColor: "#400CCC",
+      paddingRight: "79px",
+      paddingLeft: "118px",
+      "@media (max-width: 900px)": {
+        paddingLeft: 0,
+      },
+    },
+    logo: {
+      fontFamily: "Work Sans, sans-serif",
+      fontWeight: 600,
+      color: "#FFFEFE",
+      textAlign: "left",
+    },
+    menuButton: {
+      fontFamily: "Open Sans, sans-serif",
+      fontWeight: 700,
+      size: "18px",
+      marginLeft: "38px",
+    },
+    toolbar: {
+      display: "flex",
+      justifyContent: "space-between",
+    },
+    drawerContainer: {
+      padding: "20px 30px",
+    },
+  }));
+  
+  export default function Layout({children}) {
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-    justifyContent: 'space-between'
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
-}));
+    const { header, logo, menuButton, toolbar, drawerContainer } = useStyles();
+  
+    const [state, setState] = useState({
+      mobileView: false,
+      drawerOpen: false,
+    });
 
-export default function Layout({children}) {
-  const classes = useStyles();
-  const router = useRouter();
-  return (
-    <div className={classes.root}>
-      <AppBar position="absolute">
+    const router = useRouter();
+  
+    const { mobileView, drawerOpen } = state;
+  
+    useEffect(() => {
+      const setResponsiveness = () => {
+        return window.innerWidth < 900
+          ? setState((prevState) => ({ ...prevState, mobileView: true }))
+          : setState((prevState) => ({ ...prevState, mobileView: false }));
+      };
+  
+      setResponsiveness();
+  
+      window.addEventListener("resize", () => setResponsiveness());
+    }, []);
+  
+    const displayDesktop = () => {
+      return (
+        <Toolbar className={toolbar}>
+          {femmecubatorLogo}
+          <div>{getMenuButtons()}</div>
+        </Toolbar>
+      );
+    };
+  
+    const displayMobile = () => {
+
+      const handleDrawerOpen = () =>
+        setState((prevState) => ({ ...prevState, drawerOpen: true }));
+
+      const handleDrawerClose = () =>
+        setState((prevState) => ({ ...prevState, drawerOpen: false }));
+  
+      return (
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+          <IconButton
+            {...{
+              edge: "start",
+              color: "inherit",
+              "aria-label": "menu",
+              "aria-haspopup": "true",
+              onClick: handleDrawerOpen,
+            }}
+          >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            FAKE CRUD
-          </Typography>
-          <div >
-            <Button color="inherit" onClick={()=>router.push("/")}>Home</Button>
-            <Button color="inherit" onClick={()=>router.push("/posts")}>Posts</Button>
-            <Button color="inherit">Login</Button>
-            <Button color="inherit">Login</Button>
-          </div>
+  
+          <Drawer
+            {...{
+              anchor: "left",
+              open: drawerOpen,
+              onClose: handleDrawerClose,
+            }}
+          >
+            <div className={drawerContainer}>{getDrawerChoices()}</div>
+          </Drawer>
+  
+          <div>{femmecubatorLogo}</div>
         </Toolbar>
-      </AppBar>
+      );
+    };
+  
+    const getDrawerChoices = () => {
+      return headersData.map(({ label, href }) => {
+        return (
+          <Link
+            {...{
+              component: RouterLink,
+              href: href,
+              color: "inherit",
+              style: { textDecoration: "none" },
+              key: label,
+            }}
+          >
+            <MenuItem>{label}</MenuItem>
+          </Link>
+        );
+      });
+    };
+  
+    const femmecubatorLogo = (
+      <Typography variant="h6" component="h1" className={logo}>
+        FAKE API CRUD
+      </Typography>
+    );
+  
+    const getMenuButtons = () => {
+      return headersData.map(({ label, href }) => {
+        return (
+          <Button
+            {...{
+              key: label,
+              color: "inherit",
+              to: href,
+              component: RouterLink,
+              className: menuButton,
+            }}
+            onClick={()=>router.push(href)}
+          >
+            {label}
+          </Button>
+        );
+      });
+    };
+  
+    return (
+      <>
+      <header>
+        <AppBar className={header} position="sticky">
+          {mobileView ? displayMobile() : displayDesktop()}
+        </AppBar>
+      </header>
       {children}
-    </div>
-  );
-}
+      </>
+    );
+  }

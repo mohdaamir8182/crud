@@ -8,11 +8,15 @@ import Typography from "@material-ui/core/Typography";
 import axios from "axios";
 import Link from 'next/link';
 import { useRouter } from 'next/router'
+import { BASE_URL } from "../services";
 
 const useStyles = makeStyles({
   root: {
-    minWidth: 275,
-    margin: 15,
+    minWidth: 200,
+    paddingLeft: 30,
+    paddingRight: 30,
+    marginTop: 20,
+    alignItems: 'center', justifyContent: 'center'
   },
   bullet: {
     display: "inline-block",
@@ -34,7 +38,7 @@ export default function Post({ post }) {
     console.log("CALLING")
     axios({
       method: 'DELETE',
-      url: `https://jsonplaceholder.typicode.com/posts/${post.id}`,
+      url: BASE_URL + `/${post.id}`,
     })
     .then(function (response) {
       console.log("ES...:", response)
@@ -50,7 +54,7 @@ export default function Post({ post }) {
   return (
     <Card className={classes.root} variant="outlined">
       <CardContent>
-        <Typography variant="h4" component="h2">
+        <Typography variant="h4" component="h4">
           {post.id.toString()} : {post.title}
         </Typography>
 
@@ -69,7 +73,7 @@ export default function Post({ post }) {
             <a><Button variant="contained" color="primary">Edit</Button></a>
           </Link>
 
-          <Button variant="contained" color="Secondary" onClick={handleDelete}>Delete</Button>
+          <Button variant="contained" color="secondary" onClick={handleDelete}>Delete</Button>
         </CardActions>
       </CardContent>
     </Card>
@@ -77,7 +81,7 @@ export default function Post({ post }) {
 }
 
 export async function getStaticPaths() {
-  const res = await axios.get(`https://jsonplaceholder.typicode.com/posts`);
+  const res = await axios.get(BASE_URL);
   const posts = res.data;
 
   const paths = posts.map((post) => {
@@ -96,7 +100,7 @@ export async function getStaticProps(context) {
   const id = context.params.id;
 
   const res = await axios.get(
-    `https://jsonplaceholder.typicode.com/posts/${id}`
+    BASE_URL + `/${id}`
   );
   const post = res.data;
 
